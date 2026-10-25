@@ -86,7 +86,7 @@ class HostApp:
                         highlightbackground=C.CLR_BORDER,
                         highlightthickness=1)
         tabs.pack(fill="x", padx=12, pady=(0, 10))
-        for txt, val in [("Relay  (Internet / AnyDesk-style)", "relay"),
+        for txt, val in [("Relay  (Internet)", "relay"),
                          ("Direct  (LAN / IP)", "direct")]:
             tk.Radiobutton(
                 tabs, text=txt, variable=self._mode, value=val,
@@ -108,18 +108,12 @@ class HostApp:
                  font=("Segoe UI", 7, "bold")).pack(
                      anchor="w", padx=12, pady=(10, 4))
         self._id_disp = IDDisplay(self._relay_card)
-        self._id_disp.pack(fill="x", padx=12, pady=(0, 6))
+        self._id_disp.pack(fill="x", padx=12, pady=(0, 12))
         self._id_disp.bind_copy(self._copy_id)
 
-        tk.Label(self._relay_card, text="RELAY SERVER",
-                 bg=C.CLR_SURFACE, fg=C.CLR_MUTED,
-                 font=("Segoe UI", 7, "bold")).pack(
-                     anchor="w", padx=12, pady=(4, 2))
-        self._relay_ef = EntryField(
-            self._relay_card,
-            initial=f"{C.RELAY_HOST}:{C.RELAY_PORT}",
-            width=34)
-        self._relay_ef.pack(fill="x", padx=12, pady=(0, 12))
+        # relay server stored internally, not shown to user
+        self._relay_ef_var = tk.StringVar(
+            value=f"{C.RELAY_HOST}")
 
         # ── direct card (hidden by default) ──
         self._direct_card = Card(self._body)
@@ -248,8 +242,8 @@ class HostApp:
 
     # ─── RELAY ───────────────────────────────────────────────────────────────
     def _relay_connect(self):
-        self._log_info("Connecting to relay server...")
-        self._set_status("Connecting to relay...", "waiting")
+        self._log_info("Connecting to SwiftDesk relay...")
+        self._set_status("Connecting...", "waiting")
         self._relay_running = True
 
         rc = RelayConnection()

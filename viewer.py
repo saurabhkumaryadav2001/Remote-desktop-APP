@@ -47,7 +47,7 @@ class ConnectDialog(tk.Toplevel):
                         highlightbackground=C.CLR_BORDER,
                         highlightthickness=1)
         tabs.pack(fill="x", padx=12, pady=10)
-        for txt, val in [("By ID  (Internet / Relay)", "relay"),
+        for txt, val in [("By ID  (Internet)", "relay"),
                          ("By IP  (LAN / Direct)", "direct")]:
             tk.Radiobutton(tabs, text=txt, variable=self._mode, value=val,
                            bg=C.CLR_BG, fg=C.CLR_TEXT,
@@ -67,13 +67,8 @@ class ConnectDialog(tk.Toplevel):
         self._rpw_ef = EntryField(self._relay_card,
                                    label="Password",
                                    show="●", width=26)
-        self._rpw_ef.pack(fill="x", padx=12, pady=(0, 4))
-        self._relay_srv_ef = EntryField(
-            self._relay_card,
-            label="Relay server",
-            initial=f"{C.RELAY_HOST}:{C.RELAY_PORT}",
-            width=26)
-        self._relay_srv_ef.pack(fill="x", padx=12, pady=(0, 12))
+        self._rpw_ef.pack(fill="x", padx=12, pady=(0, 12))
+        # relay server is internal — not shown to user
 
         # direct fields
         self._direct_card = Card(body)
@@ -112,15 +107,10 @@ class ConnectDialog(tk.Toplevel):
 
     def _ok(self):
         if self._mode.get() == "relay":
-            raw = self._relay_srv_ef.get().strip()
-            try:
-                rh, rp = raw.rsplit(":", 1); rp = int(rp)
-            except ValueError:
-                rh, rp = C.RELAY_HOST, C.RELAY_PORT
             self.result = ("relay",
                            self._id_ef.get().strip(),
                            self._rpw_ef.get().strip(),
-                           rh, rp)
+                           C.RELAY_HOST, C.RELAY_PORT)
         else:
             try:
                 port = int(self._port_ef.get())
