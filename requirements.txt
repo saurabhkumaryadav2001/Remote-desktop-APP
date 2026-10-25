@@ -1,3 +1,1 @@
-# relay_server.py uses Python stdlib only — no pip packages needed.
-# host.py / viewer.py (local Windows use):
-#   pip install mss>=9.0.1 Pillow>=10.0.0 pynput>=1.7.6
+websockets>=13.0
