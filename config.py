@@ -7,8 +7,8 @@ CONNECT_TIMEOUT = 10          # seconds, when viewer connects
 # --- Relay server ---
 # Change RELAY_HOST to your deployed relay server IP/domain.
 # Leave as "127.0.0.1" for local testing (run relay_server.py on same machine).
-RELAY_HOST = "remote-desktop-app-n0fn.onrender.com"
-RELAY_PORT = 5052
+RELAY_HOST = "remote-desktop-app-n6fn.onrender.com"
+RELAY_PORT = 443
 RELAY_HEARTBEAT_INTERVAL = 20  # seconds between heartbeat pings
 
 # --- Authentication ---

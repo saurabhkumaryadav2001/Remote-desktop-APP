@@ -17,12 +17,14 @@ import config as C
 
 def _ws_url():
     host = C.RELAY_HOST
-    port = C.RELAY_PORT
-    # use wss if connecting to a real domain (not localhost)
-    scheme = "ws" if host in ("127.0.0.1", "localhost") else "wss"
-    if scheme == "wss":
-        return f"wss://{host}"          # Render exposes 443, no port needed
-    return f"ws://{host}:{port}"
+    # use wss if connecting to a real domain (not localhost/IP)
+    is_local = host in ("127.0.0.1", "localhost") or host.replace(".", "").isdigit()
+    if is_local:
+        port = C.RELAY_PORT
+        return f"ws://{host}:{port}"
+    else:
+        # Render/cloud — wss on 443, no port in URL needed
+        return f"wss://{host}"
 
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────
