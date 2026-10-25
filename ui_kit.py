@@ -38,79 +38,61 @@ class SwiftLabel(tk.Label):
 
 # ─── SwiftButton ─────────────────────────────────────────────────────────────
 
-class SwiftButton(tk.Canvas):
-    """Rounded-rectangle button with hover animation."""
+class SwiftButton(tk.Button):
+    """Themed flat button — drop-in replacement for the old Canvas button.
+
+    Accepts the same keyword arguments as before (colour, text_colour,
+    width, height, icon) so all callers work without changes.
+    width/height are treated as padx/pady hints, not pixel sizes, because
+    tk.Button sizing is font-driven.
+    """
 
     def __init__(self, parent, text="", command=None,
                  colour=None, width=140, height=38,
                  text_colour=C.CLR_WHITE, icon="", **kw):
-        super().__init__(parent, width=width, height=height,
-                         bg=C.CLR_BG, highlightthickness=0, **kw)
-        self._text  = text
-        self._icon  = icon
-        self._cmd   = command
-        self._w     = width
-        self._h     = height
-        self._base  = colour or C.CLR_ACCENT
-        self._hover = lerp_colour(self._base, "#ffffff", 0.12)
-        self._press = lerp_colour(self._base, "#000000", 0.15)
-        self._tfg   = text_colour
-        self._cur   = self._base
+        # strip Canvas-only kwargs that tk.Button doesn't understand
+        kw.pop("highlightthickness", None)
+
+        bg    = colour or C.CLR_ACCENT
+        hover = lerp_colour(bg, "#ffffff", 0.12)
+
+        super().__init__(
+            parent,
+            text=text,
+            command=command,
+            bg=bg,
+            fg=text_colour,
+            activebackground=hover,
+            activeforeground=text_colour,
+            relief="flat",
+            bd=0,
+            font=("Segoe UI", 10, "bold"),
+            padx=14,
+            pady=8,
+            cursor="hand2",
+            **kw,
+        )
+        self._base_bg = bg
+        self._hover   = hover
         self._enabled = True
 
-        self._draw(self._base)
-        self.bind("<Enter>",          self._on_enter)
-        self.bind("<Leave>",          self._on_leave)
-        self.bind("<ButtonPress-1>",  self._on_press)
-        self.bind("<ButtonRelease-1>",self._on_release)
-
-    # ── drawing ──
-    def _rr(self, x1, y1, x2, y2, r, **kw):
-        """Draw a rounded rectangle."""
-        self.create_arc(x1,   y1,   x1+2*r, y1+2*r, start=90,  extent=90,  **kw)
-        self.create_arc(x2-2*r, y1, x2,     y1+2*r, start=0,   extent=90,  **kw)
-        self.create_arc(x1,   y2-2*r, x1+2*r, y2,   start=180, extent=90,  **kw)
-        self.create_arc(x2-2*r, y2-2*r, x2, y2,     start=270, extent=90,  **kw)
-        self.create_rectangle(x1+r, y1, x2-r, y2, **kw)
-        self.create_rectangle(x1, y1+r, x2, y2-r, **kw)
-
-    def _draw(self, colour):
-        self.delete("all")
-        r = 8
-        kw = dict(fill=colour, outline=colour)
-        self._rr(0, 0, self._w, self._h, r, **kw)
-        label = f"{self._icon}  {self._text}" if self._icon else self._text
-        self.create_text(self._w//2, self._h//2, text=label,
-                         fill=self._tfg if self._enabled else C.CLR_MUTED,
-                         font=("Segoe UI", 10, "bold"))
-
-    # ── events ──
-    def _on_enter(self, _):
-        if self._enabled:
-            self._draw(self._hover)
-
-    def _on_leave(self, _):
-        if self._enabled:
-            self._draw(self._base)
-
-    def _on_press(self, _):
-        if self._enabled:
-            self._draw(self._press)
-
-    def _on_release(self, _):
-        if self._enabled:
-            self._draw(self._hover)
-            if self._cmd:
-                self._cmd()
+        self.bind("<Enter>", lambda _: self.config(bg=self._hover)
+                  if self._enabled else None)
+        self.bind("<Leave>", lambda _: self.config(bg=self._base_bg)
+                  if self._enabled else None)
 
     def configure(self, **kw):
         state = kw.pop("state", None)
         if state == "disabled":
             self._enabled = False
-            self._draw(C.CLR_BORDER)
+            kw.setdefault("bg",    C.CLR_BORDER)
+            kw.setdefault("fg",    C.CLR_MUTED)
+            kw.setdefault("state", "disabled")
         elif state == "normal":
             self._enabled = True
-            self._draw(self._base)
+            kw.setdefault("bg",    self._base_bg)
+            kw.setdefault("fg",    C.CLR_WHITE)
+            kw.setdefault("state", "normal")
         super().configure(**kw)
 
 
